@@ -115,7 +115,14 @@ function unionPolygons(polygons) {
         if (removed[currentIndex]) return true;
 
         // Don't search for itself
-        tree.remove({index: currentIndex}, filterByIndex);
+        var featureBbox = turfBBox(currentFeature);
+        tree.remove({
+            minX: featureBbox[0],
+            minY: featureBbox[1],
+            maxX: featureBbox[2],
+            maxY: featureBbox[3],
+            index: currentIndex
+        }, filterByIndex); // need to include BBox, otherwise matching to remove doesn't work
         removed[currentIndex] = true;
 
         // Keep applying the union operation until no more overlapping features
@@ -130,7 +137,7 @@ function unionPolygons(polygons) {
             if (search.length > 0) {
                 var polys = search.map(function (item) {
                     removed[item.index] = true;
-                    tree.remove({index: item.index}, filterByIndex);
+                    tree.remove(item, filterByIndex);
                     return item.geojson;
                 });
 
